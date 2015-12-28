@@ -404,6 +404,31 @@ extern NSString* const OAuth2_Authenticate_Header;
     [retrieveTask resume];
 }
 
+- (void)retrieveMultipleRaw:(NSString *)schemaName attributes:(NSArray *)attributes completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
+{
+  NSString *columns = @"";
+  for (NSString *column in attributes) {
+    columns = [columns stringByAppendingString:[NSString stringWithFormat:@",%@", column]];
+  }
+  
+  columns = [columns substringFromIndex:1];
+  NSString *endpoint = [NSString stringWithFormat:@"%@Set?$select=%@", schemaName, columns];
+  NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];
+  
+  NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    if (error == nil)
+    {
+      if (completionBlock) completionBlock(data, nil);
+    }
+    else
+    {
+      if (completionBlock) completionBlock(nil, error);
+    }
+  }];
+  
+  [retrieveTask resume];
+}
+
 #pragma mark - SOAP endpoint
 
 //  These methods set up the request for communicating with the SOAP endpoint
