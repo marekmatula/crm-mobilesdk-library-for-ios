@@ -404,7 +404,7 @@ extern NSString* const OAuth2_Authenticate_Header;
     [retrieveTask resume];
 }
 
-- (void)retrieveMultipleRaw:(NSString *)schemaName attributes:(NSArray *)attributes completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
+- (void)retrieveMultipleRaw:(NSString *)schemaName attributes:(NSArray *)attributes filterExpression:(NSString *)filterExpression completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
 {
   NSString *columns = @"";
   for (NSString *column in attributes) {
@@ -413,6 +413,11 @@ extern NSString* const OAuth2_Authenticate_Header;
   
   columns = [columns substringFromIndex:1];
   NSString *endpoint = [NSString stringWithFormat:@"%@Set?$select=%@", schemaName, columns];
+  if (filterExpression.length)
+  {
+    filterExpression = [filterExpression stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    endpoint = [NSString stringWithFormat:@"%@&$filter=%@", endpoint, filterExpression];
+  }
   NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];
   
   NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
