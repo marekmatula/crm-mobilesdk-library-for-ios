@@ -22,6 +22,10 @@ typedef void(^AuthCallback)(id result);
 - (void)delete:(NSString *)schemaName id:(NSUUID *)id completionBlock:(void (^) (NSError *error))completionBlock;
 - (void)retrieve:(NSString *)schemaName id:(NSUUID *)id attributes:(NSArray *)attributes completionBlock:(void (^) (Entity *entity, NSError *error))completionBlock;
 - (void)retrieveMultiple:(NSString *)schemaName attributes:(NSArray *)attributes completionBlock:(void (^) (EntityCollection *entities, NSError *error))completionBlock;
-- (void)retrieveMultipleRaw:(NSString *)schemaName attributes:(NSArray *)attributes filterExpression:(NSString *)filterExpression completionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
+- (void)retrieveMultipleRaw:(NSString *)schemaName
+                 attributes:(NSArray *)attributes
+           filterExpression:(NSString *)filterExpression
+          orderByExpression:(NSString *)orderByExpression
+            completionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
 
 @end
