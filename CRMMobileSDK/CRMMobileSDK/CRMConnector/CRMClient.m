@@ -456,6 +456,24 @@ extern NSString* const OAuth2_Authenticate_Header;
   [retrieveTask resume];
 }
 
+- (void)retrieveWithURL:(NSString *)URL completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
+{
+  NSURLRequest *request = [self oDataRequest:@"GET" forURL:URL];
+  
+  NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    if (error == nil)
+    {
+      if (completionBlock) completionBlock(data, nil);
+    }
+    else
+    {
+      if (completionBlock) completionBlock(nil, error);
+    }
+  }];
+  
+  [retrieveTask resume];
+}
+
 #pragma mark - SOAP endpoint
 
 //  These methods set up the request for communicating with the SOAP endpoint
@@ -502,6 +520,16 @@ extern NSString* const OAuth2_Authenticate_Header;
     }
     
     return retVal;
+}
+
+- (NSURLRequest *)oDataRequest:(NSString *)request forURL:(NSString *)URL
+{
+  NSMutableURLRequest *retVal =[[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:URL]];
+  [retVal setHTTPMethod:request];
+  [retVal setValue:[NSString stringWithFormat:@"Bearer %@", self.accessToken] forHTTPHeaderField:@"Authorization"];
+  [retVal setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+  
+  return retVal;
 }
 
 - (NSError *)errorFromResponse:(NSURLResponse *)response dictionary:(NSDictionary *)dict
