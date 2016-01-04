@@ -408,6 +408,8 @@ extern NSString* const OAuth2_Authenticate_Header;
                  attributes:(NSArray *)attributes
            filterExpression:(NSString *)filterExpression
           orderByExpression:(NSString *)orderByExpression
+                        top:(NSString *)top
+                       skip:(NSString *)skip
             completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
 {
   NSString *columns = @"";
@@ -426,6 +428,16 @@ extern NSString* const OAuth2_Authenticate_Header;
   {
     orderByExpression = [orderByExpression stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     endpoint = [NSString stringWithFormat:@"%@&$orderby=%@", endpoint, orderByExpression];
+  }
+  if (top.length)
+  {
+    top = [top stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    endpoint = [NSString stringWithFormat:@"%@&$top=%@", endpoint, top];
+  }
+  if (skip.length)
+  {
+    skip = [skip stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    endpoint = [NSString stringWithFormat:@"%@&$skip=%@", endpoint, skip];
   }
   
   NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];

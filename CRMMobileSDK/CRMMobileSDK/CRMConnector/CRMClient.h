@@ -26,6 +26,8 @@ typedef void(^AuthCallback)(id result);
                  attributes:(NSArray *)attributes
            filterExpression:(NSString *)filterExpression
           orderByExpression:(NSString *)orderByExpression
+                        top:(NSString *)top
+                       skip:(NSString *)skip
             completionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
 
 @end
