@@ -164,6 +164,45 @@ extern NSString* const OAuth2_Authenticate_Header;
     [executeTask resume];
 }
 
+- (void)executeRaw:(OrganizationRequest *)request withCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
+{
+  NSString *executeXML = [NSString stringWithFormat:@""
+                          "<Execute xmlns='http://schemas.microsoft.com/xrm/2011/Contracts/Services' xmlns:i='http://www.w3.org/2001/XMLSchema-instance'>"
+                          "%@"
+                          "</Execute>", [request generateSOAP]];
+  NSString *executeBody = [self requestBodyForExecuteXML:executeXML];
+  
+  NSURLRequest *executeRequest = [self soapRequestForBody:executeBody soapAction:@"http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute"];
+  
+  NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  {
+    if (error == nil)
+    {
+      NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+      
+      if (statusCode == 200)
+      {
+        if (completionBlock) completionBlock(data, nil);
+      }
+      else
+      {
+        NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSString *statusText = [NSHTTPURLResponse localizedStringForStatusCode:statusCode];
+        NSError *statusError = [NSError errorWithDomain:statusText code:statusCode
+                                               userInfo:@{ NSLocalizedDescriptionKey: responseString }];
+        
+        if (completionBlock) completionBlock(nil, statusError);
+      }
+    }
+    else
+    {
+      if (completionBlock) completionBlock(nil, error);
+    }
+  }];
+  
+  [executeTask resume];
+}
+
 #pragma mark - OData methods
 
 - (void)create:(Entity *)entity completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock

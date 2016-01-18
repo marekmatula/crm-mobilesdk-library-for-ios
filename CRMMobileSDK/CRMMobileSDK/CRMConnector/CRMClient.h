@@ -16,6 +16,7 @@ typedef void(^AuthCallback)(id result);
 - (void)loginWithEndpoint:(NSString *)endpoint completion:(AuthCallback)completion;
 
 - (void)execute:(OrganizationRequest *)request withCompletionBlock:(void (^) (OrganizationResponse *response, NSError *error))completionBlock;
+- (void)executeRaw:(OrganizationRequest *)request withCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
 
 - (void)create:(Entity *)entity completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock;
 - (void)update:(Entity *)entity completionBlock:(void (^) (NSError *error))completionBlock;
