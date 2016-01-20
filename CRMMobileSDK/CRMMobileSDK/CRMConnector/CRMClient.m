@@ -203,6 +203,41 @@ extern NSString* const OAuth2_Authenticate_Header;
   [executeTask resume];
 }
 
+- (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
+{
+  NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:@"OrganizationData.svc/$metadata" relativeToURL:self.endpointURL]];
+  [request setHTTPMethod:@"GET"];
+  [request setValue:[NSString stringWithFormat:@"Bearer %@", self.accessToken] forHTTPHeaderField:@"Authorization"];
+  [request setValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+  
+  NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  {
+   if (error == nil)
+   {
+     NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+     if (statusCode == 200)
+     {
+       if (completionBlock) completionBlock(data, nil);
+     }
+     else
+     {
+       NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+       NSString *statusText = [NSHTTPURLResponse localizedStringForStatusCode:statusCode];
+       NSError *statusError = [NSError errorWithDomain:statusText code:statusCode
+                                              userInfo:@{ NSLocalizedDescriptionKey: responseString }];
+       
+       if (completionBlock) completionBlock(nil, statusError);
+     }
+   }
+   else
+   {
+     if (completionBlock) completionBlock(nil, error);
+   }
+  }];
+  
+  [executeTask resume];
+}
+
 #pragma mark - OData methods
 
 - (void)create:(Entity *)entity completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock
