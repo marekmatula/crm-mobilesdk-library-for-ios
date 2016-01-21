@@ -52,7 +52,8 @@
              ![class isEqualToString:@"Relationship"] &&
              ![class isEqualToString:@"ResourceInfo"] &&
              ![class isEqualToString:@"TraceInfo"] &&
-             ![class isEqualToString:@"ValidationResult"]) {
+             ![class isEqualToString:@"ValidationResult"] &&
+             ![class isEqualToString:@"AliasedValue"]) {
         [NSException raise:@"Invalid Type"
                     format:@"The type '%@' is not valid for SOAP.", class];
     }

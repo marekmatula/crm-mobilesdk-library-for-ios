@@ -38,3 +38,4 @@ FOUNDATION_EXPORT const unsigned char CRMMobileSDKVersionString[];
 #import "ResourceInfo.h"
 #import "TraceInfo.h"
 #import "ValidationResult.h"
+#import "AliasedValue.h"
