@@ -7,6 +7,7 @@
 #import "EntityCollection.h"
 
 typedef void(^AuthCallback)(id result);
+typedef void(^LogoutCallback)(BOOL completed);
 
 @interface CRMClient : NSObject
 
@@ -14,6 +15,7 @@ typedef void(^AuthCallback)(id result);
 + (instancetype)sharedClient;
 
 - (void)loginWithEndpoint:(NSString *)endpoint completion:(AuthCallback)completion;
+- (void)logoutForEndpoint:(NSString *)endpoint completion:(LogoutCallback)completion;
 
 - (void)execute:(OrganizationRequest *)request withCompletionBlock:(void (^) (OrganizationResponse *response, NSError *error))completionBlock;
 - (void)executeRaw:(OrganizationRequest *)request withCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock;

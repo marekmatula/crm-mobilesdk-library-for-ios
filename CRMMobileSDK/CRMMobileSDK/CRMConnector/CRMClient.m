@@ -115,6 +115,74 @@ extern NSString* const OAuth2_Authenticate_Header;
     [authorityTask resume];
 }
 
+- (void)logoutForEndpoint:(NSString *)endpoint completion:(LogoutCallback)completion
+{
+  NSURL *endpointURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/XRMServices/2011/", endpoint]];
+  
+  // Create an auth challenge request
+  NSString *path = @"Organization.svc/web?SdkClientVersion=6.1.0.533";
+  
+  NSMutableURLRequest *authorityRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:path relativeToURL:endpointURL]];
+  [authorityRequest setHTTPMethod:@"GET"];
+  [authorityRequest setValue:@"Bearer" forHTTPHeaderField:@"Authorization"];
+  [authorityRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Accept"];
+  
+  NSURLSessionDataTask *authorityTask = [[NSURLSession sharedSession] dataTaskWithRequest:authorityRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  {
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+    NSString  *authenticateHeader = [httpResponse.allHeaderFields valueForKey:OAuth2_Authenticate_Header];
+    // Pre Vega builds sometimes have extra information, this removes it
+    NSRange commaRange = [authenticateHeader rangeOfString:@","];
+    if (commaRange.location != NSNotFound)
+    {
+      authenticateHeader = [authenticateHeader substringToIndex:commaRange.location];
+    }
+    
+    NSRange equalRange = [authenticateHeader rangeOfString:@"="];
+    if (equalRange.location != NSNotFound) {
+      NSString *updatedHeader = [authenticateHeader stringByReplacingOccurrencesOfString:@"=" withString:@"=\""];
+      updatedHeader = [updatedHeader stringByAppendingString:@"\""];
+      authenticateHeader = updatedHeader;
+    }
+    
+    NSError *adError = nil;
+    ADAuthenticationParameters *params = [ADAuthenticationParameters parametersFromResponseAuthenticateHeader:authenticateHeader error:&adError];
+    
+    if (adError)
+    {
+      NSLog(@"AD error %@ : %@", error.debugDescription, error.localizedRecoverySuggestion);
+      dispatch_sync(dispatch_get_main_queue(), ^{
+        UIAlertView *errorAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"The authentication parameters could not be determined.  Please check your server settings and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles: nil];
+        [errorAlert show];
+      });
+      
+      return;
+    }
+    
+    NSString *authorityEndpoint = params.authority;
+    
+    // Don't validate the authority as ADFS authorities cannot be validated
+    ADAuthenticationContext* context = [ADAuthenticationContext authenticationContextWithAuthority:authorityEndpoint validateAuthority:NO error:&adError];
+    if (!context)
+    {
+      if (adError)
+      {
+        NSLog(@"AD error %@ : %@", error.debugDescription, error.localizedRecoverySuggestion);
+      }
+      dispatch_sync(dispatch_get_main_queue(), ^{
+        UIAlertView *errorAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"The login authority could not be established." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles: nil];
+        [errorAlert show];
+      });
+      return;
+    }
+    
+    [context.tokenCacheStore removeAllWithError:&adError];
+    self.accessToken = nil;
+  }];
+  
+  [authorityTask resume];
+}
+
 #pragma mark - SOAP methods
 
 - (void)execute:(OrganizationRequest *)request withCompletionBlock:(void (^) (OrganizationResponse *response, NSError *error))completionBlock
