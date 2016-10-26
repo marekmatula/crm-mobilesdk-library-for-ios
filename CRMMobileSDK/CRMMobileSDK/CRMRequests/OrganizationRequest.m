@@ -54,7 +54,11 @@
     NSString *requestNameSOAP = (self.requestName == nil) ?
         @"<a:RequestName i:nil=\"true\" />" :
         [NSString stringWithFormat:@"<a:RequestName>%@</a:RequestName>", self.requestName];
-    
+
+    // Extract only class name
+    NSString *requestType = NSStringFromClass([self class]);
+    requestType = [requestType componentsSeparatedByString: @"."].lastObject;
+
     return [NSString stringWithFormat:
             @"<request i:type='%@:%@' xmlns:a='http://schemas.microsoft.com/xrm/2011/Contracts' xmlns:c='http://schemas.microsoft.com/crm/2011/Contracts'>"
                 "<a:Parameters xmlns:b='http://schemas.datacontract.org/2004/07/System.Collections.Generic'>"
@@ -63,7 +67,7 @@
                 "%@"
                 "%@"
             "</request>",
-            [[self class] requestNamespace], NSStringFromClass([self class]), parameters, requestIdSOAP, requestNameSOAP];
+            [[self class] requestNamespace], requestType, parameters, requestIdSOAP, requestNameSOAP];
 }
 
 + (NSString *)requestNamespace {
