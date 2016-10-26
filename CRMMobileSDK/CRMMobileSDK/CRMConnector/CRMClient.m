@@ -194,7 +194,9 @@ extern NSString* const OAuth2_Authenticate_Header;
     NSString *executeBody = [self requestBodyForExecuteXML:executeXML];
     
     NSURLRequest *executeRequest = [self soapRequestForBody:executeBody soapAction:@"http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute"];
-    
+
+    [self logRequest:executeRequest];
+
     NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
@@ -241,7 +243,9 @@ extern NSString* const OAuth2_Authenticate_Header;
   NSString *executeBody = [self requestBodyForExecuteXML:executeXML];
   
   NSURLRequest *executeRequest = [self soapRequestForBody:executeBody soapAction:@"http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute"];
-  
+
+  [self logRequest:executeRequest];
+
   NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
   {
     if (error == nil)
@@ -269,6 +273,13 @@ extern NSString* const OAuth2_Authenticate_Header;
   }];
   
   [executeTask resume];
+}
+
+
+- (void)logRequest:(NSURLRequest *) request {
+    NSString* req;
+    req = [[NSString alloc] initWithData:request.HTTPBody encoding:NSASCIIStringEncoding];
+    NSLog(@"REQ: %@", req);
 }
 
 - (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
