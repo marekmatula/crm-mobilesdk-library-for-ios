@@ -277,9 +277,10 @@ extern NSString* const OAuth2_Authenticate_Header;
 
 
 - (void)logRequest:(NSURLRequest *) request {
-    NSString* req;
-    req = [[NSString alloc] initWithData:request.HTTPBody encoding:NSASCIIStringEncoding];
-    NSLog(@"REQ: %@", req);
+    NSString* body;
+    body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSASCIIStringEncoding];
+
+    NSLog(@"REQUEST URL: %@\nBODY:\n%@", request.URL.absoluteString, body);
 }
 
 - (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
@@ -474,10 +475,15 @@ extern NSString* const OAuth2_Authenticate_Header;
     for (NSString *column in attributes) {
         columns = [columns stringByAppendingString:[NSString stringWithFormat:@",%@", column]];
     }
-    
+
+    NSString *ln = [entityClass performSelector:@selector(entityLogicalName)];
+    //[[Entity entityClass] performSelector:@selector(entityLogicalName)];
+    //[entityClass  isSubclassOfClass:[Entity class]]
     columns = [columns substringFromIndex:1];
-    NSString *endpoint = [NSString stringWithFormat:@"%@Set(guid'%@')?$select=%@", schemaName, [id UUIDString], columns];
+    NSString *endpoint = [NSString stringWithFormat:@"%@Set(guid'%@')?$select=%@", ln, [id UUIDString], columns];
     NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];
+
+    [self logRequest:request];
     
     NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
@@ -524,6 +530,8 @@ extern NSString* const OAuth2_Authenticate_Header;
     columns = [columns substringFromIndex:1];
     NSString *endpoint = [NSString stringWithFormat:@"%@Set?$select=%@", schemaName, columns];
     NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];
+
+    [self logRequest:request];
     
     NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
