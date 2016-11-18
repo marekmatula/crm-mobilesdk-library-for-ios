@@ -181,6 +181,8 @@ extern NSString* const OAuth2_Authenticate_Header;
   }];
   
   [authorityTask resume];
+
+  if (completion) completion(false);
 }
 
 #pragma mark - SOAP methods
@@ -280,7 +282,7 @@ extern NSString* const OAuth2_Authenticate_Header;
     NSString* body;
     body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSASCIIStringEncoding];
 
-    NSLog(@"REQUEST URL: %@\nBODY:\n%@", request.URL.absoluteString, body);
+    //NSLog(@"REQUEST URL: %@\nBODY:\n%@", request.URL.absoluteString, body);
 }
 
 - (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
