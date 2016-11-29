@@ -33,42 +33,36 @@
 	return self;
 }
 
-- (instancetype)initWithDictionary:(NSDictionary *)dict
+- (instancetype)initWithDictionary:(NSDictionary *)dict fields:(NSDictionary *)fields;
 {
     self = [self initWithLogicalName:[[self class] entityLogicalName]];
-    
+
     NSDictionary *attributes = dict[@"d"];
     if (!attributes) {
         attributes = dict;
     }
-    
-    unsigned int propertyCount = 0;
-    objc_property_t *properties = class_copyPropertyList([self class], &propertyCount);
-    for (unsigned int i = 0; i < propertyCount; i++) {
-        objc_property_t property = properties[i];
-        const char *propertyName = property_getName(property);
-        const char *propertyAttrs = property_getAttributes(property);
-        
-        NSString *key = [NSString stringWithUTF8String:propertyName];
-        NSObject *attribute = attributes[key];
-        
-        NSString *propertyAttributes = [NSString stringWithUTF8String:propertyAttrs];
-        NSArray *propertyAttrArray = [propertyAttributes componentsSeparatedByString:@","];
-        NSString *className = (NSString *)propertyAttrArray[0];
-        
-        className = [[className substringToIndex:([className length] - 1)] substringFromIndex:3];
-        Class valueClass = NSClassFromString(className);
-        
-        if (attribute && [valueClass conformsToProtocol:@protocol(JSONParser)]) {
-            id value = [valueClass instanceWithJSONObject:attribute];
-            
-            if (value && ![value isKindOfClass:[NSNull class]]) {
-                [self setValue:value forKey:key];
+
+    if (attributes) {
+        NSMutableDictionary *attsDict = [NSMutableDictionary dictionary];
+        for (NSString* key in fields) {
+            //id attribute = [dict objectForKey:key];
+            NSObject *attribute = attributes[key];
+            NSObject *className = fields[key];
+            // NSLog(@"JSON attribute %@ : %@", key, attribute);
+
+            Class valueClass = NSClassFromString(className);
+
+            if (attribute && [valueClass conformsToProtocol:@protocol(JSONParser)]) {
+                id value = [valueClass instanceWithJSONObject:attribute];
+
+                if (value && ![value isKindOfClass:[NSNull class]]) {
+                    // [self setValue:value forKey:key];
+                    [self setObject:value forKeyedSubscript:key];
+                }
             }
         }
     }
-    
-    free(properties);
+
     return self;
 }
 
@@ -124,22 +118,22 @@
     }
     
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    
-    unsigned int propertyCount = 0;
-    objc_property_t *properties = class_copyPropertyList(class, &propertyCount);
-    for (unsigned int i = 0; i < propertyCount; i++) {
-        objc_property_t property = properties[i];
-        const char *propertyName = property_getName(property);
-        
-        NSString *key = [NSString stringWithUTF8String:propertyName];
-        id value = [[self valueForKey:key] generateJSON];
-        
-        if (value) {
-            dict[key] = value;
+
+    for (id key in [self.attributes allKeys]) {
+        id value = self.attributes[key];
+
+        if (![value conformsToProtocol:@protocol(JSONGenerator)]) {
+            [NSException raise:@"Invalid Attribute Type"
+                        format:@"Attribute \"%@\" does not conform to JSONGenerator protocol.", key];
+        }
+
+        id val = [value generateJSON];
+
+        if (val) {
+            dict[key] = val;
         }
     }
-    
-    free(properties);
+
     return dict;
 }
 

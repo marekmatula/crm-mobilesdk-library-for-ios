@@ -19,6 +19,8 @@ extern NSString* const OAuth2_Authenticate_Header;
 
 @end
 
+static Boolean logEnabled = false;
+
 @implementation CRMClient
 
 + (instancetype)clientWithClientID:(NSString *)clientId redirectURI:(NSString *)redirectURI {
@@ -279,10 +281,26 @@ extern NSString* const OAuth2_Authenticate_Header;
 
 
 - (void)logRequest:(NSURLRequest *) request {
+    if (!logEnabled) {
+        return;
+    }
+
     NSString* body;
     body = [[NSString alloc] initWithData:request.HTTPBody encoding:NSASCIIStringEncoding];
 
-    //NSLog(@"REQUEST URL: %@\nBODY:\n%@", request.URL.absoluteString, body);
+    NSLog(@"REQUEST URL: %@\nBODY:\n%@", request.URL.absoluteString, body);
+}
+
+- (void)logResponse:(NSURLResponse *) response data:(NSData *) data {
+    if (!logEnabled) {
+        return;
+    }
+
+    NSString* body = @"";
+    if (data){
+        body = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    }
+    NSLog(@"RESPONSE URL: %@\nBODY:\n%@", response.URL.absoluteString, body);
 }
 
 - (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock
@@ -341,10 +359,14 @@ extern NSString* const OAuth2_Authenticate_Header;
     
     NSString *endpoint = [schemaName stringByAppendingString:@"Set"];
     NSURLRequest *request = [self oDataRequest:@"POST" forEndpoint:endpoint withBody:body];
+
+    [self logRequest:request];
     
     NSURLSessionDataTask *createTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
+            [self logResponse: response data: data];
+
             NSError *serError = nil;
             NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&serError];
             if (serError)
@@ -388,13 +410,18 @@ extern NSString* const OAuth2_Authenticate_Header;
         if (completionBlock) completionBlock(serError);
         return;
     }
-    
-    NSString *endpoint = [NSString stringWithFormat:@"%@Set(guid'%@')", schemaName, [entity.id UUIDString]];
+
+    NSString *ln = [entityClass performSelector:@selector(entityLogicalName)];
+    NSString *endpoint = [NSString stringWithFormat:@"%@Set(guid'%@')", ln, [entity.id UUIDString]];
     NSURLRequest *request = [self oDataRequest:@"MERGE" forEndpoint:endpoint withBody:body];
+
+    [self logRequest:request];
     
     NSURLSessionDataTask *updateTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
+            [self logResponse: response data: data];
+
             if ([data length] > 0)
             {
                 NSError *serError = nil;
@@ -433,10 +460,14 @@ extern NSString* const OAuth2_Authenticate_Header;
     
     NSString *endpoint = [NSString stringWithFormat:@"%@Set(guid'%@')", schemaName, [id UUIDString]];
     NSURLRequest *request = [self oDataRequest:@"DELETE" forEndpoint:endpoint withBody:nil];
+
+    [self logRequest:request];
     
     NSURLSessionDataTask *deleteTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
+            [self logResponse: response data: data];
+
             if ([data length] > 0)
             {
                 NSError *serError = nil;
@@ -466,7 +497,7 @@ extern NSString* const OAuth2_Authenticate_Header;
     [deleteTask resume];
 }
 
-- (void)retrieve:(NSString *)schemaName id:(NSUUID *)id attributes:(NSArray *)attributes completionBlock:(void (^) (Entity *entity, NSError *error))completionBlock
+- (void)retrieve:(NSString *)schemaName id:(NSUUID *)id attributes:(NSDictionary *)attributes completionBlock:(void (^) (Entity *entity, NSError *error))completionBlock
 {
     Class entityClass = NSClassFromString(schemaName);
     if (![entityClass isSubclassOfClass:[Entity class]]) {
@@ -490,6 +521,8 @@ extern NSString* const OAuth2_Authenticate_Header;
     NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
+            [self logResponse: response data: data];
+
             NSError *serError = nil;
             NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&serError];
             if (serError)
@@ -505,7 +538,8 @@ extern NSString* const OAuth2_Authenticate_Header;
                 return;
             }
             
-            Entity *returnedEntity = [[entityClass alloc] initWithDictionary:resultDict];
+            Entity *returnedEntity = [[entityClass alloc] initWithDictionary:resultDict fields:attributes];
+            returnedEntity.id = id;
             if (completionBlock) completionBlock(returnedEntity, nil);
         }
         else
@@ -517,7 +551,7 @@ extern NSString* const OAuth2_Authenticate_Header;
     [retrieveTask resume];
 }
 
-- (void)retrieveMultiple:(NSString *)schemaName attributes:(NSArray *)attributes completionBlock:(void (^) (EntityCollection *entities, NSError *error))completionBlock
+- (void)retrieveMultiple:(NSString *)schemaName attributes:(NSDictionary *)attributes completionBlock:(void (^) (EntityCollection *entities, NSError *error))completionBlock
 {
     Class entityClass = NSClassFromString(schemaName);
     if (![entityClass isSubclassOfClass:[Entity class]]) {
@@ -538,6 +572,8 @@ extern NSString* const OAuth2_Authenticate_Header;
     NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
+            [self logResponse: response data: data];
+
             NSError *serError = nil;
             NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&serError];
             if (serError)
@@ -604,10 +640,14 @@ extern NSString* const OAuth2_Authenticate_Header;
   }
   
   NSURLRequest *request = [self oDataRequest:@"GET" forEndpoint:endpoint withBody:nil];
+
+    [self logRequest:request];
   
   NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
     if (error == nil)
     {
+        [self logResponse: response data: data];
+
       if (completionBlock) completionBlock(data, nil);
     }
     else
@@ -622,10 +662,14 @@ extern NSString* const OAuth2_Authenticate_Header;
 - (void)retrieveWithURL:(NSString *)URL completionBlock:(void (^) (NSData *data, NSError *error))completionBlock
 {
   NSURLRequest *request = [self oDataRequest:@"GET" forURL:URL];
+
+    [self logRequest:request];
   
   NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
     if (error == nil)
     {
+        [self logResponse: response data: data];
+
       if (completionBlock) completionBlock(data, nil);
     }
     else
