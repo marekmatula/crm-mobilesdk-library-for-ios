@@ -61,6 +61,10 @@
                 }
             }
         }
+
+        NSString *idKey = [[self class] entityIdAttribute];
+        NSObject *idVal = attributes[idKey];
+        self.id = [NSUUID instanceWithJSONObject:idVal];
     }
 
     return self;
@@ -242,9 +246,21 @@
 }
 
 + (NSString *)entityLogicalName
-{
-    return nil;
-}
+    {
+        return nil;
+    }
+
++ (NSString *)entityIdAttribute
+    {
+        return nil;
+    }
+
++ (NSString *)entityClassName
+    {
+        NSString *className = NSStringFromClass([self class]);
+        //className = [[className componentsSeparatedByString:@"."] lastObject];
+        return  className;
+    }
 
 + (NSNumber *)entityTypeCode
 {

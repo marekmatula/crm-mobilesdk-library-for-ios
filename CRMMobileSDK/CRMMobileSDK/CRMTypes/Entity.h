@@ -25,6 +25,8 @@
 - (EntityReference *)toEntityReference;
 
 + (NSString *)entityLogicalName;
++ (NSString *)entityIdAttribute;
++ (NSString *)entityClassName;
 + (NSNumber *)entityTypeCode;
 
 @end

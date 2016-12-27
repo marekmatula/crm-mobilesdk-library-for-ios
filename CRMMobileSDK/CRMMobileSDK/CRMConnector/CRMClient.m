@@ -19,7 +19,7 @@ extern NSString* const OAuth2_Authenticate_Header;
 
 @end
 
-static Boolean logEnabled = false;
+static Boolean logEnabled = true;
 
 @implementation CRMClient
 
@@ -340,11 +340,13 @@ static Boolean logEnabled = false;
 
 #pragma mark - OData methods
 
-- (void)create:(Entity *)entity completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock
+- (void)create:(Entity *)entity attributes:(NSDictionary *)attributes completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock
 {
     Class entityClass = [entity class];
     NSString *schemaName = NSStringFromClass(entityClass);
-    
+    //NSString *schemaName = [[entity class] entityClassName];
+    //entityClass = NSClassFromString(schemaName);
+
     if (![entityClass isSubclassOfClass:[Entity class]]) {
         [NSException raise:@"Invalid Type" format:@"%@ is not a strongly-typed subclass of Entity", schemaName];
     }
@@ -356,8 +358,9 @@ static Boolean logEnabled = false;
         if (completionBlock) completionBlock(nil, serError);
         return;
     }
-    
-    NSString *endpoint = [schemaName stringByAppendingString:@"Set"];
+
+    NSString *ln = [entityClass performSelector:@selector(entityLogicalName)];
+    NSString *endpoint = [ln stringByAppendingString:@"Set"];
     NSURLRequest *request = [self oDataRequest:@"POST" forEndpoint:endpoint withBody:body];
 
     [self logRequest:request];
@@ -381,8 +384,8 @@ static Boolean logEnabled = false;
                 if (completionBlock) completionBlock(nil, returnedError);
                 return;
             }
-            
-            Entity *returnedEntity = [[entityClass alloc] initWithDictionary:resultDict];
+
+            Entity *returnedEntity = [[entityClass alloc] initWithDictionary:resultDict fields:attributes];
             if (completionBlock) completionBlock(returnedEntity.id, nil);
         }
         else

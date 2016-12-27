@@ -21,7 +21,7 @@ typedef void(^LogoutCallback)(BOOL completed);
 - (void)executeRaw:(OrganizationRequest *)request withCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
 - (void)getMetadataWithCompletionBlock:(void (^) (NSData *data, NSError *error))completionBlock;
 
-- (void)create:(Entity *)entity completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock;
+- (void)create:(Entity *)entity attributes:(NSDictionary *)attributes completionBlock:(void (^) (NSUUID *id, NSError *error))completionBlock;
 - (void)update:(Entity *)entity completionBlock:(void (^) (NSError *error))completionBlock;
 - (void)delete:(NSString *)schemaName id:(NSUUID *)id completionBlock:(void (^) (NSError *error))completionBlock;
 - (void)retrieve:(NSString *)schemaName id:(NSUUID *)id attributes:(NSDictionary *)attributes completionBlock:(void (^) (Entity *entity, NSError *error))completionBlock;
