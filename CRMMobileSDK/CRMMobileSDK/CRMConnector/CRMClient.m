@@ -19,7 +19,7 @@ extern NSString* const OAuth2_Authenticate_Header;
 
 @end
 
-static Boolean logEnabled = true;
+static Boolean logEnabled = false;
 
 @implementation CRMClient
 
