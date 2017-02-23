@@ -246,9 +246,14 @@
 }
 
 + (NSString *)entityLogicalName
-    {
-        return nil;
-    }
+{
+    return nil;
+}
+
++ (NSString *)entitySetName
+{
+    return nil;
+}
 
 + (NSString *)entityIdAttribute
     {

@@ -359,8 +359,7 @@ static Boolean logEnabled = false;
         return;
     }
 
-    NSString *ln = [entityClass performSelector:@selector(entityLogicalName)];
-    NSString *endpoint = [ln stringByAppendingString:@"Set"];
+    NSString *endpoint = [entityClass performSelector:@selector(entitySetName)];
     NSURLRequest *request = [self oDataRequest:@"POST" forEndpoint:endpoint withBody:body];
 
     [self logRequest:request];
