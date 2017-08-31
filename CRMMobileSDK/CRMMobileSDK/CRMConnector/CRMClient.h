@@ -15,6 +15,9 @@ typedef void(^LogoutCallback)(BOOL completed);
 + (instancetype)sharedClient;
 
 - (NSString *) accessToken;
+- (NSURLSession*) session;
+- (void) setSession:(NSURLSession*) session;
+
 
 - (void)loginWithEndpoint:(NSString *)endpoint completion:(AuthCallback)completion;
 - (void)logoutForEndpoint:(NSString *)endpoint completion:(LogoutCallback)completion;

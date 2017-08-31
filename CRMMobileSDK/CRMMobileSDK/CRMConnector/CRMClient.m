@@ -16,6 +16,9 @@ extern NSString* const OAuth2_Authenticate_Header;
 @property (nonatomic, copy) NSString *redirectURI;
 
 @property (nonatomic, copy) NSString *accessToken;
+@property (nonatomic, copy) NSURLSession *session;
+
+//self session
 
 @end
 
@@ -27,6 +30,7 @@ static Boolean logEnabled = false;
     CRMClient *client = [self sharedClient];
     client.clientID = clientId;
     client.redirectURI = redirectURI;
+    client.session = [NSURLSession sharedSession];
     
     return client;
 }
@@ -53,7 +57,7 @@ static Boolean logEnabled = false;
     [authorityRequest setValue:@"Bearer" forHTTPHeaderField:@"Authorization"];
     [authorityRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Accept"];
     
-    NSURLSessionDataTask *authorityTask = [[NSURLSession sharedSession] dataTaskWithRequest:authorityRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *authorityTask = [[self session] dataTaskWithRequest:authorityRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
         NSString  *authenticateHeader = [httpResponse.allHeaderFields valueForKey:OAuth2_Authenticate_Header];
         // Pre Vega builds sometimes have extra information, this removes it
@@ -129,7 +133,7 @@ static Boolean logEnabled = false;
   [authorityRequest setValue:@"Bearer" forHTTPHeaderField:@"Authorization"];
   [authorityRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Accept"];
   
-  NSURLSessionDataTask *authorityTask = [[NSURLSession sharedSession] dataTaskWithRequest:authorityRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  NSURLSessionDataTask *authorityTask = [[self session] dataTaskWithRequest:authorityRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
   {
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
     NSString  *authenticateHeader = [httpResponse.allHeaderFields valueForKey:OAuth2_Authenticate_Header];
@@ -201,7 +205,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:executeRequest];
 
-    NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *executeTask = [[self session] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
@@ -250,7 +254,7 @@ static Boolean logEnabled = false;
 
   [self logRequest:executeRequest];
 
-  NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  NSURLSessionDataTask *executeTask = [[self session] dataTaskWithRequest:executeRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
   {
     if (error == nil)
     {
@@ -310,7 +314,7 @@ static Boolean logEnabled = false;
   [request setValue:[NSString stringWithFormat:@"Bearer %@", self.accessToken] forHTTPHeaderField:@"Authorization"];
   [request setValue:@"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
   
-  NSURLSessionDataTask *executeTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
+  NSURLSessionDataTask *executeTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
   {
    if (error == nil)
    {
@@ -364,7 +368,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
     
-    NSURLSessionDataTask *createTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *createTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             [self logResponse: response data: data];
@@ -419,7 +423,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
     
-    NSURLSessionDataTask *updateTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *updateTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             [self logResponse: response data: data];
@@ -465,7 +469,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
     
-    NSURLSessionDataTask *deleteTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *deleteTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             [self logResponse: response data: data];
@@ -520,7 +524,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
     
-    NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *retrieveTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             [self logResponse: response data: data];
@@ -571,7 +575,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
     
-    NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    NSURLSessionDataTask *retrieveTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil)
         {
             [self logResponse: response data: data];
@@ -645,7 +649,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
   
-  NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+  NSURLSessionDataTask *retrieveTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
     if (error == nil)
     {
         [self logResponse: response data: data];
@@ -667,7 +671,7 @@ static Boolean logEnabled = false;
 
     [self logRequest:request];
   
-  NSURLSessionDataTask *retrieveTask = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+  NSURLSessionDataTask *retrieveTask = [[self session] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
     if (error == nil)
     {
         [self logResponse: response data: data];
