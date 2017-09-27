@@ -105,17 +105,21 @@ static Boolean logEnabled = false;
             return;
         }
         
-        // This performs the authentication and the library will jump in with the login page if needed
-        [context acquireTokenWithResource:endpoint
-                                 clientId:self.clientID
-                              redirectUri:[NSURL URLWithString:self.redirectURI]
-                          completionBlock:^(ADAuthenticationResult *result) {
-                              if (result.status == AD_SUCCEEDED) {
-                                  self.accessToken = result.accessToken;
-                              }
-                              
-                              if (completion) completion(result);
-                          }];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            // This performs the authentication and the library will jump in with the login page if needed
+            [context acquireTokenWithResource:endpoint
+                                     clientId:self.clientID
+                                  redirectUri:[NSURL URLWithString:self.redirectURI]
+                              completionBlock:^(ADAuthenticationResult *result) {
+                                  if (result.status == AD_SUCCEEDED) {
+                                      self.accessToken = result.accessToken;
+                                  }
+                                  
+                                  if (completion) completion(result);
+                              }];
+        });
     }];
     
     [authorityTask resume];
@@ -181,9 +185,11 @@ static Boolean logEnabled = false;
       });
       return;
     }
-    
-    [context.tokenCacheStore removeAllWithError:&adError];
-    self.accessToken = nil;
+      
+      ADKeychainTokenCache *tc = [[ADKeychainTokenCache alloc] init];
+      [tc removeAllForClientId:_clientID error:&adError];
+      
+      self.accessToken = nil;
   }];
   
   [authorityTask resume];
