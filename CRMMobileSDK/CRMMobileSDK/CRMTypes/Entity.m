@@ -43,7 +43,7 @@
     }
 
     if (attributes) {
-        NSMutableDictionary *attsDict = [NSMutableDictionary dictionary];
+        //NSMutableDictionary *attsDict = [NSMutableDictionary dictionary];
         for (NSString* key in fields) {
             //id attribute = [dict objectForKey:key];
             NSObject *attribute = attributes[key];

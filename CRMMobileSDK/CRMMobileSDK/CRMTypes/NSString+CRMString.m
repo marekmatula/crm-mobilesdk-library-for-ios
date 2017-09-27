@@ -1,6 +1,6 @@
 //  NSString+CRMString.m
 
-#import "NSstring+CRMString.h"
+#import "NSString+CRMString.h"
 #import "NSString+XMLEncode.h"
 
 @implementation NSString (CRMString)

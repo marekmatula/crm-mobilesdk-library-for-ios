@@ -46,7 +46,7 @@ static Boolean logEnabled = false;
 
 #pragma mark - Authentication methods
 
-- (void)loginWithEndpoint:(NSString *)endpoint completion:(ADAuthenticationCallback)completion {
+- (void)loginWithEndpoint:(NSString *)endpoint completion:(AuthCallback)completion {
     self.endpointURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/XRMServices/2011/", endpoint]];
     
     // Create an auth challenge request

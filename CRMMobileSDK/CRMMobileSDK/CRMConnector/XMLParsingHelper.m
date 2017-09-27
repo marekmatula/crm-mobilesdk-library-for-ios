@@ -25,7 +25,7 @@
     // Get the data from the string and create an XML Document
     NSData *docData = [xmlDocString dataUsingEncoding:NSUTF8StringEncoding];
     
-    parsingHelper.docPtr = xmlReadMemory([docData bytes], [docData length], "", NULL, XML_PARSE_RECOVER);
+    parsingHelper.docPtr = xmlReadMemory([docData bytes], (int)[docData length], "", NULL, XML_PARSE_RECOVER);
     
     return parsingHelper;
 }
