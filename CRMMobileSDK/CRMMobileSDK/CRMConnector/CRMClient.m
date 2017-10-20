@@ -732,7 +732,8 @@ static Boolean logEnabled = false;
     [retVal setHTTPMethod:request];
     [retVal setValue:[NSString stringWithFormat:@"Bearer %@", self.accessToken] forHTTPHeaderField:@"Authorization"];
     [retVal setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
+[retVal setValue:@"odata.include-annotations=\"*\"" forHTTPHeaderField:@"Prefer"];
+
     if (body) {
         [retVal setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
         [retVal setHTTPBody:body];
@@ -747,7 +748,8 @@ static Boolean logEnabled = false;
   [retVal setHTTPMethod:request];
   [retVal setValue:[NSString stringWithFormat:@"Bearer %@", self.accessToken] forHTTPHeaderField:@"Authorization"];
   [retVal setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-  
+  [retVal setValue:@"odata.include-annotations=\"*\"" forHTTPHeaderField:@"Prefer"];
+
   return retVal;
 }
 
