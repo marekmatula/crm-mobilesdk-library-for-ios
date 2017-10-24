@@ -125,18 +125,21 @@
 
     for (id key in [self.attributes allKeys]) {
         id value = self.attributes[key];
-
+        
         if (![value conformsToProtocol:@protocol(JSONGenerator)]) {
             [NSException raise:@"Invalid Attribute Type"
                         format:@"Attribute \"%@\" does not conform to JSONGenerator protocol.", key];
         }
-
+        
         id val = [value generateJSON];
-
+        
         if (val) {
             dict[key] = val;
         }
     }
+
+    //NSDictionary *relElDict = (NSDictionary *)[self.relatedEntities generateJSON];
+    //[dict addEntriesFromDictionary:(relElDict)];
 
     return dict;
 }

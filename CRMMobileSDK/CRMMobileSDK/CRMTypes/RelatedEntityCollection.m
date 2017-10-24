@@ -57,4 +57,10 @@
     return collection;
 }
 
+//- (NSObject *)generateJSON
+//{
+//   NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//   return dict;
+//}
+
 @end
