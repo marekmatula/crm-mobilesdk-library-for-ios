@@ -24,5 +24,5 @@ Pod::Spec.new do |s|
   s.library = 'xml2'
   s.xcconfig = { 'HEADER_SEARCH_PATHS' => '/usr/include/libxml2' }
 
-  s.dependency 'ADAL', '=2.6.1'
+  s.dependency 'ADAL', '=2.6.7'
 end
